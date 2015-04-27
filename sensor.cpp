@@ -53,8 +53,7 @@ sensor::~sensor()
 {
 }
 
-
-
+#ifdef HCLA
 uint16_t sensor::readHCLA(int channel){
 	sensor::SelectChannel(channel);
 	
@@ -110,3 +109,5 @@ void sensor::SelectChannel(int channel){
 	channels[ch_stat] = chnum;
 	ch_stat++;
  }
+
+#endif

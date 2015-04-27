@@ -18,12 +18,13 @@ serial mav;
 #include "SdFat\SdFat.h"
 #endif
 
-
+#ifdef CANBUS
 #include "FlexCAN\FlexCAN.h"
 #include "canbus.h"
 canbus cbus;
 CAN_message_t c_msg;
 CAN_message_t c_msg2;
+#endif
 
 #ifdef HCLA
 #include "i2c_t3\i2c_t3.h"
@@ -41,9 +42,9 @@ void setup(){
 
 	Serial.begin(115200);
 	Serial.println("Serial online");
-
-	IntervalTimer messTimer;
-	messTimer.begin(measureHCLA, 10);
+	pinMode(13, OUTPUT);
+	//IntervalTimer messTimer;
+	//messTimer.begin(measureHCLA, 10);
 
 
 
@@ -61,8 +62,13 @@ void setup(){
 
 void loop(){
 #ifdef MAVLINK
+	digitalWrite(13, HIGH);
 	mav.heartbeat();
 	//mav.air_speed();
+	Serial.println("Heartbeat");
+	digitalWrite(13, LOW);
+	delay(500);
+	
 #endif
 
 
@@ -101,6 +107,3 @@ void loop(){
 #endif
 }
 
-void measureHCLA(){
-
-}

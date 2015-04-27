@@ -5,17 +5,15 @@ Klasse für die Serialkommunikation mit PC, Funkmodul und Telemetrie
 sowie die Implemntierug der Weitergabe von Fehlermeldungen
 */
 
-#include "config.h"
-#include "sensor.h"	   
+#include "config.h"  
 #include "mavlink/mavlink.h"
-
+	
 
 class serial
 {
 public:
 
 	serial();
-	~serial();
 	void heartbeat();
 	void air_speed();
 

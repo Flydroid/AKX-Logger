@@ -12,11 +12,11 @@ Die Funktionien der einzelen Module sind hier definiert.
 */
 
 /* Module */
-#define MESSMODUL
+//#define MESSMODUL
 
-
+#define MAVLINK
 //#define TELEMETRY
-#define MASTER
+//#define MASTER
 
 
 
