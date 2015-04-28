@@ -14,31 +14,31 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="_core">
-      <UniqueIdentifier>{f29b7a8f-176e-4424-86db-42c52c1b150c}</UniqueIdentifier>
+      <UniqueIdentifier>{c4074d94-f5e2-4b71-863a-15b302315191}</UniqueIdentifier>
     </Filter>
     <Filter Include="_core\avr">
-      <UniqueIdentifier>{2a5c4945-3956-4fdb-a812-4c0648818b7b}</UniqueIdentifier>
+      <UniqueIdentifier>{76f22aa9-9aef-41a2-957e-ba9682c578d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="_core\util">
-      <UniqueIdentifier>{eb20c256-78a8-4cb2-b1cc-1c10a7e58d24}</UniqueIdentifier>
+      <UniqueIdentifier>{7412cbcd-4342-4d80-9ffd-f26e0c0b5829}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries">
-      <UniqueIdentifier>{0e7a7f22-b698-4542-9847-7675fa6ed3d6}</UniqueIdentifier>
+      <UniqueIdentifier>{84b8faae-8e5c-40e3-ae47-11a736808133}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\FlexCAN">
-      <UniqueIdentifier>{6525d433-9afb-43e2-8bea-7bc336ae990d}</UniqueIdentifier>
+      <UniqueIdentifier>{e67ebade-dc12-411f-9d03-097bc6a48365}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\i2c_t3">
-      <UniqueIdentifier>{fb6768c2-9ce5-4653-a5ff-40bc510d2930}</UniqueIdentifier>
+      <UniqueIdentifier>{bda67905-ead9-443e-931e-f3aca8b37c60}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\mavlink">
-      <UniqueIdentifier>{0b6e053b-487d-47e1-b99e-c4873fef77ae}</UniqueIdentifier>
+      <UniqueIdentifier>{12908ba2-2f72-4288-80e4-1055ba86dc8b}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SdFat">
-      <UniqueIdentifier>{2379b55b-577f-4e1b-a915-d12954327132}</UniqueIdentifier>
+      <UniqueIdentifier>{a4409315-c872-4490-b6bf-06fdef3578a4}</UniqueIdentifier>
     </Filter>
     <Filter Include="_libraries\SdFat\utility">
-      <UniqueIdentifier>{901c43d2-35bf-498b-a59e-2f483b525d64}</UniqueIdentifier>
+      <UniqueIdentifier>{10c2f58d-8517-4900-82af-e4e209cfca08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

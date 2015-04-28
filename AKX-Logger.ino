@@ -7,9 +7,8 @@
 #include "config.h"
 
 #ifdef MAVLINK
-#include "mavlink\mavlink.h"L
+#include "mavlink\mavlink.h"
 #include "serial.h"
-
 serial mav;
 
 #endif

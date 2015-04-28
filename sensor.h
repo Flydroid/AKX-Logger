@@ -1,4 +1,4 @@
-#pragma once
+
 
 /*
 Klasse für das Auslesen der Sensoren
@@ -22,10 +22,7 @@ Statischer Drucksensor
 
 #endif
 
-// MPU9150, schon dabei um die Struktur darzustellen
-#ifdef MPU9150
 
-#endif
 
 
 
@@ -60,3 +57,7 @@ private:
 
 };
 
+// MPU9150, schon dabei um die Struktur darzustellen
+#ifdef MPU9150
+
+#endif
