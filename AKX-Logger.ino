@@ -1,13 +1,8 @@
 
-
-
-
-
-
 #include "config.h"
 
 #ifdef MAVLINK
-#include "mavlink\mavlink.h"
+#include "mavlink2/minimal/mavlink.h"
 #include "serial.h"
 serial mav;
 
@@ -35,10 +30,6 @@ sensor hcla;
 
 void setup(){
 
-
-
-
-
 	Serial.begin(115200);
 	Serial.println("Serial online");
 	pinMode(13, OUTPUT);
@@ -62,11 +53,14 @@ void setup(){
 void loop(){
 #ifdef MAVLINK
 	digitalWrite(13, HIGH);
+	int time1 = micros();
 	mav.heartbeat();
+	int time2 = micros();
 	//mav.air_speed();
 	Serial.println("Heartbeat");
+	Serial.println(time2 - time1);
 	digitalWrite(13, LOW);
-	delay(500);
+	delay(2000);
 	
 #endif
 

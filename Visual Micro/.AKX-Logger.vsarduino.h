@@ -12,6 +12,7 @@
 #define _VSARDUINO_H_
 #define __ARM_MK20dx256__
 #define __ARM_MK20DX256__
+#define _VMDEBUG 1
 #define ARDUINO 106
 #define ARDUINO_MAIN
 #define __AVR__
