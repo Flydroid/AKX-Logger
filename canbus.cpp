@@ -1,26 +1,15 @@
 #include "canbus.h"
 
-
-
-
 canbus::canbus(){
-	
 	can.begin();
 	broadcast.id = 0x0;
 	broadcast.buf[0] = 0x00;
 	broadcast.len = sizeof(broadcast.buf);
-
-
-		
-	
-
 }
 
-
-
-
-
-
+int canbus::available(){
+	return can.available();
+}
 
 void canbus::write(CAN_message_t msg){
 	if (can.write(msg) == 0){
@@ -33,5 +22,4 @@ int canbus::read(CAN_message_t msg){
 		//Fehlermeldung: No Frame available
 		return 0;
 	}
-
 }

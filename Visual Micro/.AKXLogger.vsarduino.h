@@ -87,6 +87,8 @@ extern "C" void __cxa_pure_virtual() {;}
 #include <canbus.cpp>
 #include <canbus.h>
 #include <config.h>
+#include <sdcard.cpp>
+#include <sdcard.h>
 #include <sensor.cpp>
 #include <sensor.h>
 #include <serial.cpp>

@@ -1,5 +1,7 @@
 
+
 #include "config.h"
+
 
 #ifdef MAVLINK
 #include "mavlink.h"
@@ -9,19 +11,16 @@ serial mav;
 
 #endif
 
-#ifdef SD_LOG
-#include "SdFat.h"
-SdFat SD;
-SdFile SD_File;
+#ifdef SDCARD
+#include <SdFat.h>
+#endif // SDCARD
 
-#endif
+
 
 #ifdef GPS
 #include "TinyGPSPlus/TinyGPS++.h"
 TinyGPSPlus gps;
-#endif 
-
-
+#endif
 
 #include "FlexCAN.h"
 #include "canbus.h"
@@ -33,25 +32,22 @@ CAN_message_t c_msg2;
 #include "i2c_t3.h"
 #include "sensor.h"
 
-
 sensor hcla;
 #endif
 
 #ifdef MASTER
 
-
 //struct with all information on every connected module
 struct MODULES{
-	uint8_t ID;
-	uint8_t	ID_EXT = 0x00;
+	uint8_t ID;			      //Module ID
+	uint8_t	ID_EXT = 0x00;	  // different than 0x00 if more than 4 Sensors
 	uint8_t SYSTEM_STATE;
-	String NAME;
-	bool READ_STATE = 0;
+	String NAME;			  //Name of the Module
+	bool READ_STATE = 0;	  //If the Module has been read for this cycle
 	uint8_t data1[8];
 	uint8_t data2[8];
-	uint8_t SENSOR_NUMBER;
-
-
+	uint8_t SENSOR_NUMBER;	   //Numbers of sensors
+	uint8_t SENSOR_OR;	     //Which of the 8 possible Sensors are active
 }tmp;
 MODULES *module_data;
 
@@ -61,18 +57,7 @@ IntervalTimer telemetry;
 volatile bool c_broadcast;
 volatile bool c_telemetry;
 
-//Buffer for L
-struct buffer_t{
-	uint16_t count;
-	uint8_t data[512];
-}log_buffer[2];
-//variable for buffer selection
-uint8_t sel_buf = 0;
-
-
-#endif 
-
-
+#endif
 
 #ifdef MESSMODUL
 struct SYSTEM{
@@ -81,24 +66,19 @@ struct SYSTEM{
 	uint8_t ERROR = 2;
 } SYSTEM_STATE;
 
-#endif 
+#endif
 
 //Interrupt function
 void measureHCLA(){
-
 }
 
 void send_broadcast(){
 	c_broadcast = true;
 }
 
-
 void send_telemetry(){
 	c_telemetry = true;
 }
-
-
-
 
 void setup(){
 #ifdef DEBUG
@@ -106,13 +86,11 @@ void setup(){
 	Serial.println("Serial online");
 #endif
 
-
 #ifdef MASTER
 
 	/*
 	Master boot up
 	*/
-
 
 	//get Date and Time
 	//gps.encode(SERIAL_GPS.read());
@@ -123,27 +101,12 @@ void setup(){
 	//datetime.date = gps.date.value();
 	//datetime.time = gps.time.value();
 
-	//SD card 
-	SD.begin(SS_PIN, SPI_FULL_SPEED);
-	char fileName[11] =BASE_FILENAME;
-	//fileName[0] = datetime.date;
-	//+datetime.time + BASE_FILENAME;
-
-	if (!SD_File.open(fileName, O_WRITE | O_APPEND | O_CREAT)){
-		//error handling
-	}
-
-
+	
 
 	broadcast.begin(send_broadcast, 10000);
 	telemetry.begin(send_telemetry, 1000000);
 
-
-
-
-
 	//Bootup end
-
 
 	int m_num = 0;
 	char m_tmp[8];
@@ -165,6 +128,8 @@ void setup(){
 		module_data[m_num].ID = msg.buf[0];
 		module_data[m_num].ID_EXT = msg.buf[1];
 		module_data[m_num].SYSTEM_STATE = msg.buf[2];
+		module_data[m_num].SENSOR_NUMBER = msg.buf[3];
+		cbus.read(c_msg2);
 		for (int i = 0; i < 8; i++)
 		{
 			m_tmp[i] = c_msg2.buf[i];
@@ -192,62 +157,50 @@ void setup(){
 		change = 0;
 	}
 
-	//shift all elements in module_data by one
+	//shift all elements in module_data by one, because master is module_data[0x00]
 	for (int i = 0; i < sizeof(module_data); i++){
 		tmp = module_data[i + 1];
 		module_data[i + 1] = module_data[i];
 		module_data[i + 2] = tmp;
 	}
 
+	//Write Master sensor data to module_date[0x00]
+	module_data[MASTER_ID].ID = MASTER_ID;
+	module_data[MASTER_ID].NAME = MASTER_NAME;
+	module_data[MASTER_ID].SENSOR_NUMBER = sizeof(hcla.channels);
 
+	//Start display, show module name and data
 
-	//Write FileHeader
-	SD_File.print("AK-X Logger v.1/nLogdatei vom: ");
+	/*Write FileHeader
+
+	*/
+#ifdef SDCARD
+
+	
+	SD_File.print("AK-X Logger v.1\nLogdatei vom: ");
 	//SD_File.print(datetime.date);
-	SD_File.print("um");
+	SD_File.print(" ");
 	//SD_File.print(datetime.time);
-	SD_File.print("/nEingeckete Module");
+	SD_File.print("\nEingeckete Module\t");
+	SD_File.print(sizeof(hcla.channels));
+	SD_File.print("\n");
 	for (int i = 1; i < sizeof(module_data); i++){
-		SD_File.print(module_data[i].NAME);
-
+		SD_File.print(module_data[i].NAME);								  
+		SD_File.print("\t");
 		SD_File.print(module_data[i].ID);
-		SD_File.print(" Sensoren=");
+		SD_File.print("\tSensoren\t");
 		SD_File.print(module_data[i].SENSOR_NUMBER);
-		SD_File.print("/n");
+		SD_File.print("\n");
 	}
-	SD_File.print("/nLogdaten:/n");
-	for (int i = 1; i < sizeof(module_data); i++){
-		SD_File.print(module_data[i].NAME);
-		for (int x = 1; x < module_data[i].SENSOR_NUMBER; x++){
-
-		}
-	}
-	SD_File.print("/n");
-	for (int i = 1; i < sizeof(module_data); i++){
-		SD_File.print("Sensor");
-		for (int x = 1; x < module_data[i].SENSOR_NUMBER; x++){
-			SD_File.print("S");
-			SD_File.print(x);
-			SD_File.print("/t");
-		}
-	}
-	SD_File.print("/n");
+	SD_File.print("Binary Date:\n");
 	//Close File
 	SD_File.close();
 
-
-
-
-
-
-
-
-
+#endif // SDCARD
 
 #endif
-
+	
 #ifdef MESSMODUL
-
 
 	//wait for master to boot
 	delay(5000);
@@ -257,6 +210,7 @@ void setup(){
 	c_msg.buf[1] = MESSMODUL_ID_EXT;
 	c_msg.buf[2] = SYSTEM_STATE.POWER_UP;
 	c_msg.buf[3] = sizeof(hcla.channels);
+	//c_msg.buf[4] =
 	c_msg.len = sizeof(c_msg.buf);
 	cbus.write(c_msg);
 	c_msg2.id = MESSMODUL_ID_EXT;
@@ -270,33 +224,18 @@ void setup(){
 	messTimer.begin(measureHCLA, 10);
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
-
 void loop(){
-
-
-
 #ifdef MASTER
-
 
 	//Read sensor, send broadcast, get data from Modules and Store it.
 	if (c_broadcast){
+		//send broadcast
+		cbus.write(cbus.broadcast);
+		//get Time for data synchonisation
+		uint32_t time = millis();		
+
 		//read the master sensors
 		uint16_t s_buf[sizeof(hcla.channels)];
 		for (int i = 0; i < sizeof(hcla.channels); i++){
@@ -305,20 +244,23 @@ void loop(){
 			s_buf[1 + i * 2] = tmp;
 		}
 
-		//send broadcast
-		cbus.write(cbus.broadcast);
-
-
 		//read measurement modules
 		for (int recv_data = 1; recv_data < sizeof(module_data); recv_data++){
 			CAN_message_t msg, msg2;
 			cbus.read(msg);
-			if (!module_data[msg.id].READ_STATE){
+			//if READ_STATE is true
+			if (module_data[msg.id].READ_STATE){
 				continue;
 			}
-			for (int i = 0; i < 8; i++){
-				module_data[msg.id].data1[i] = msg.buf[i];
+			if (msg.id == module_data[msg.id].ID){
+				for (int i = 0; i < 8; i++){
+					module_data[msg.id].data1[i] = msg.buf[i];
+				}
 			}
+			else{
+				// error: wrong first module massage
+			}
+
 			if (module_data[msg.id].ID_EXT != 0x00){
 				cbus.read(msg2);
 				if (msg2.id == module_data[msg.id].ID_EXT){
@@ -327,23 +269,23 @@ void loop(){
 					}
 				}
 				else{
-					//error wrong second canbus massage
+					//error wrong second module massage
 				}
 			}
 			module_data[msg.id].READ_STATE = 1;
 		}
 
-
-
-
-
-
-
-
-
-
-		//Store data	
-
+		//Store Timestamp
+		log_buffer[sel_buf].data[log_buffer[sel_buf].count] = 0x09; // \t
+		log_buffer[sel_buf].count++;
+		for (int i = 0; i < 4; i++){
+			log_buffer[sel_buf].data[log_buffer[sel_buf].count] = time >> 24-i*8;
+			log_buffer[sel_buf].count++;
+		}
+		log_buffer[sel_buf].data[log_buffer[sel_buf].count] = 0x09;	// \t
+		log_buffer[sel_buf].count++;
+		
+		//Store data
 		for (int i = 1; i < sizeof(module_data); i++){
 			if (module_data[i].SENSOR_NUMBER >4){
 				for (int x = 0; x < 8; x++){
@@ -360,8 +302,6 @@ void loop(){
 						}
 					}
 				}
-
-
 			}
 			else{
 				for (int x = 0; x < module_data[i].SENSOR_NUMBER; x++){
@@ -395,9 +335,7 @@ void loop(){
 					}
 				}
 			}
-
 		}
-
 
 		noInterrupts();
 		c_broadcast = false;
@@ -424,51 +362,42 @@ void loop(){
 		interrupts();
 	}
 
-
-
 #endif
-
-
-
 
 #ifdef MESSMODUL
 
-
-	cbus.read(c_msg);
-	if (c_msg.id == MASTER_ID){
-		switch (c_msg.buf[0]){
-		case 1:
-			c_msg.id = MESSMODUL_ID;
-			c_msg2.id = MESSMODUL_ID_EXT;
-			for (int i = 0; i < sizeof(hcla.channels); i++){
-				uint16_t tmp = hcla.readHCLA(hcla.channels[i]);
-				if (i < 4){
-					c_msg.buf[0 + i * 2] = tmp << 8;
-					c_msg.buf[1 + i * 2] = tmp;
+	if (cbus.available()){
+		cbus.read(c_msg);
+		if (c_msg.id == MASTER_ID){
+			switch (c_msg.buf[0]){
+			case 1:
+				c_msg.id = MESSMODUL_ID;
+				c_msg2.id = MESSMODUL_ID_EXT;
+				for (int i = 0; i < sizeof(hcla.channels); i++){
+					uint16_t tmp = hcla.readHCLA(hcla.channels[i]);
+					if (i < 4){
+						c_msg.buf[0 + i * 2] = tmp << 8;
+						c_msg.buf[1 + i * 2] = tmp;
+					}
+					else{
+						c_msg2.buf[-8 + i * 2] = tmp << 8;
+						c_msg2.buf[-7 + i * 2] = tmp;
+					}
 				}
-				else{
-					c_msg2.buf[-8 + i * 2] = tmp << 8;
-					c_msg2.buf[-7 + i * 2] = tmp;
+				c_msg.len = sizeof(c_msg.buf);
+				cbus.write(c_msg);
+				if (sizeof(c_msg2) != 0){
+					c_msg2.len = sizeof(c_msg2.buf);
+					cbus.write(c_msg2);
 				}
+			case 2:
+				// Send errorlog
+			default:
+				break;
 			}
-			c_msg.len = sizeof(c_msg.buf);
-			cbus.write(c_msg);
-			if (sizeof(c_msg2) != 0){
-				c_msg2.len = sizeof(c_msg2.buf);
-				cbus.write(c_msg2);
-			}
-		case 2:
-			// Send errorlog
-		default:
-			break;
 		}
-
 	}
-
-	
-
-
-}
 #endif
 
-
+	//Loop end
+}
